@@ -82,13 +82,13 @@ public class MainActivity extends Activity {
 
     public void initLayout() {
         waterfall_scroll = (CustomScrollView) findViewById(R.id.waterfall_scroll);
-        waterfall_scroll.getView();
         //设置滚动监听
         waterfall_scroll.setOnScrollListener(new CustomScrollView.OnScrollListener() {
             @Override
             public void onBottom() {
                 // 滚动到最低端
-                // AddItemToContainer(++current_page, page_count);
+                AddItemToContainer(++current_page, page_count);
+                Log.d("Scroll", "Scroll to bottom");
             }
 
             @Override
@@ -100,7 +100,7 @@ public class MainActivity extends Activity {
             @Override
             public void onScroll() {
                 // 滚动中
-                Log.d("Scroll", "Scroll");
+                Log.d("Scroll", "Scrolling");
             }
         });
 

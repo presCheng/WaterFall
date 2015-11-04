@@ -4,6 +4,7 @@ import android.content.Context;
 import android.os.Handler;
 import android.os.Message;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ScrollView;
@@ -13,8 +14,6 @@ import android.widget.ScrollView;
  * 自定义ScrollView
  */
 public class CustomScrollView extends ScrollView {
-    private View view;
-    private Handler handler;
 
     public CustomScrollView(Context context) {
         super(context);
@@ -27,6 +26,7 @@ public class CustomScrollView extends ScrollView {
     public CustomScrollView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
     }
+
 
     /**
      * 获得由垂直方向滚动条代表的所有垂直范围，缺省的范围是当前视图的画图高度。
@@ -44,73 +44,27 @@ public class CustomScrollView extends ScrollView {
         return super.computeVerticalScrollOffset();
     }
 
-    private void init() {
-        this.setOnTouchListener(onTouchListener);
-        handler = new Handler() {
-            @Override
-            public void handleMessage(Message msg) {
-                super.handleMessage(msg);
-                switch (msg.what) {
-                    case 1:
-                        /**
-                         * getMeasuredHeight()获得控件的实际大小
-                         * getScrollY()获得ScrollView滑动的距离
-                         * getHeight是获得控件的显示的大小，如果控件大小超出的屏幕，那他的大小就是屏幕的大小。
-                         * 详情见：http://www.cnblogs.com/qinghuaideren/p/3186990.html
-                         */
-
-                        if (view.getMeasuredHeight() <= getScaleY() + getHeight()) {
-                            if (onScrollListener != null) {
-                                onScrollListener.onBottom();
-                            }
-
-                        } else if (getScrollY() == 0) {
-                            if (onScrollListener != null) {
-                                onScrollListener.onTop();
-                            }
-                        } else {
-                            if (onScrollListener != null) {
-                                onScrollListener.onScroll();
-                            }
-                        }
-                        break;
-                    default:
-                        break;
-                }
-            }
-        };
-    }
-
-
-    OnTouchListener onTouchListener = new OnTouchListener() {
-        @Override
-        public boolean onTouch(View v, MotionEvent event) {
-            switch (event.getAction()) {
-                //屏幕按下
-                case MotionEvent.ACTION_DOWN:
-                    break;
-                //按下抬起
-                case MotionEvent.ACTION_UP:
-                    if (view != null && onScrollListener != null) {
-                        handler.sendMessageDelayed(handler.obtainMessage(1), 200);
-                    }
-                    break;
-                default:
-                    break;
-            }
-            return false;
-        }
-    };
-
     /**
-     * 获得参考的View，主要是为了获得它的MeasuredHeight，然后和滚动条的ScrollY+getHeight作比较。
+     *
+     * getScrollY()获得ScrollView滑动的距离
+     * getHeight是获得控件的显示的大小，如果控件大小超出的屏幕，那他的大小就是屏幕的大小。
+     * 详情见：http://www.cnblogs.com/qinghuaideren/p/3186990.html
      */
-    public void getView() {
-        this.view = getChildAt(0);
-        if (view != null) {
-            init();
+    @Override
+    protected void onScrollChanged(int l, int t, int oldl, int oldt) {
+
+        if (t + getHeight() >= computeVerticalScrollRange()) {
+            //ScrollView滑动到底部了
+            onScrollListener.onBottom();
+
+        } else if (getScrollY() == 0) {
+            onScrollListener.onTop();
+        } else {
+            onScrollListener.onScroll();
         }
+
     }
+
 
     /**
      * 定义接口
